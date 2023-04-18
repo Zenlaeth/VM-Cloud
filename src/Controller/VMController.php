@@ -3,31 +3,89 @@
 namespace App\Controller;
 
 use Azure\AzureClient;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Azure\Entity\VirtualMachine;
+use App\Form\LoginType;
 use Azure\AzureVMClient;
-use Azure\Entity\NetworkInterface;
+use Azure\Entity\VirtualMachine;
 use Azure\Profile\NetworkProfile;
 use Azure\Profile\StorageProfile;
+use Azure\Entity\NetworkInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class VMController extends AbstractController
 {
     /**
-     * @Route("/index", name="app_index")
+     * @Route("/index/{email}", name="app_index")
      */
-    public function index(): Response
+    public function index(string $email): Response
     {
-        return $this->render('vm/index.html.twig', [
+        if(!$email) {
+            return $this->redirectToRoute('account_login');
+        }
+
+        return $this->render('index.html.twig', [
             'controller_name' => 'VMController',
+            'email' => $email
         ]);
     }
 
     /**
-     * @Route("/create-vm", name="app_create_vm")
+     * Permet d'afficher le formulaire de connexion
+     * 
+     * @Route("/login", name="account_login")
+     * 
+     * @return Response
      */
-    public function createVM(): Response
+    public function login(Request $request)
+    {
+        $form = $this->createForm(LoginType::class);
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            $email = $request->request->get('login')['email'];
+            $password = $request->request->get('login')['password'];
+            $token = $request->request->get('login')['_token'];
+            
+            $users = [
+                [
+                    'email' => 'vm1@hotmail.com',
+                    'password' => 'vm1'
+                ],
+                [
+                    'email' => 'vm2@hotmail.com',
+                    'password' => 'vm2'
+                ],
+                [
+                    'email' => 'vm3@hotmail.com',
+                    'password' => 'vm3'
+                ]
+            ];
+
+            foreach($users as $user) {
+                if($user['email'] == $email && $user['password'] == $password) {
+                    $this->addFlash(
+                        'success',
+                        "Vous vous êtes bien connecté."
+                    );
+        
+                    return $this->redirectToRoute('app_index', ['email' => $email]);
+                }
+            }
+        }
+
+        return $this->render('login.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/create-vm/{type}", name="app_create_vm")
+     */
+    public function createVM($type): Response
     {
         // Create client and authenticate LATER.
         $azureClient = new AzureVMClient(
@@ -57,6 +115,32 @@ class VMController extends AbstractController
 
         // Add or change Profiles..
         $storage = new StorageProfile();
+        if($type == 'Ubuntu') {
+            $storage->addOsDisk([
+                "name" => 'new_vm_osdisk_ubuntu',
+                "osType" => 'Linux',
+                "createOption" => 'fromImage'
+            ]);
+            $storage->addImageReference([
+                "sku"=> "16.04-LTS",
+                "publisher"=> "Canonical",
+                "version"=> "latest",
+                "offer"=> "UbuntuServer"
+            ]);
+        }
+        else if($type == 'Windows') {
+            $storage->addOsDisk([
+                "name" => 'new_vm_osdisk_ubuntu',
+                "createOption" => 'fromImage'
+            ]);
+            $storage->addImageReference([
+                "sku"=> "2016-Datacenter",
+                "publisher"=> "MicrosoftWindowsServer",
+                "version"=> "latest",
+                "offer"=> "WindowsServer"
+            ]);
+        }
+
         $machine->setStorageProfile($storage);
         
         // Create a public ip address

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Création de machines virtuelles
+{% endblock %}
+
+{% block header %}
+    <h2>Voici le header</h2>
+{% endblock %}
+{# 
+{% set vm1Token = "78820214295cf3f4151a.0_G67gjUA6LE-k3Xl_yxvN82Q4kpNEAUG_lhnrA14Fk.qYX8llC-e8Syizu--p_Z3pZwN-BjXitbWM5X1MFHjBW9iJfZcu1AzZPIDA" %}
+{% set vm2Token = "e65b2100.RyJ_oTtyyAzEYBeF1---GPPAKMO0y2TRba13HlVJC7s.PVY52WMYsGqyEWHsuozWerqGXKr-oQ-eLppBVCQ7Z_cpW1KWQUuLY5NSVg" %}
+{% set vm3Token = "4b6b2d965d6a.q5nyKngAIt_AnjVPXdwJGmGhXh7xo6lgEMa8kUiQ3IQ.0e20UiBqWrm270MmML9heCjnKne7ycIvU_GK2znisMjF4N8dAjlhsJesdA" %} #}
+
+{% block body %}
+<div class="container">
+    <div class="jumbotron mt-3">
+        <h1 class="display-3">VM</h1>
+
+        <hr class="my-4">
+        {% if email == "vm1@hotmail.com" %}
+        <p class="lead">Désolé mais vous n'avez pas assez de crédits !</p>
+        {% elseif email == "vm2@hotmail.com" %}
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="{{ path('app_create_vm', {'type': 'Ubuntu'}) }}" role="button">Créer une machine virtuelle Ubuntu</a>
+        </p>
+        {% elseif email == "vm3@hotmail.com" %}
+
+        {% endif %}
+    </div>
+    
+{% endblock %}
