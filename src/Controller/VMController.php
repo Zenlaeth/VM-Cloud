@@ -2,13 +2,13 @@
 
 namespace App\Controller;
 
-use Azure\AzureClient;
+use AzureClient;
 use App\Form\LoginType;
-use Azure\AzureVMClient;
-use Azure\Entity\VirtualMachine;
-use Azure\Profile\NetworkProfile;
-use Azure\Profile\StorageProfile;
-use Azure\Entity\NetworkInterface;
+use Client\AzureVMClient;
+use App\Entity\VirtualMachine;
+use Profile\NetworkProfile;
+use Profile\StorageProfile;
+use App\Entity\NetworkInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,7 +20,7 @@ class VMController extends AbstractController
     /**
      * @Route("/index/{email}", name="app_index")
      */
-    public function index(string $email): Response
+    public function index(string $email)
     {
         if(!$email) {
             return $this->redirectToRoute('account_login');
@@ -83,9 +83,9 @@ class VMController extends AbstractController
     }
 
     /**
-     * @Route("/create-vm/{type}", name="app_create_vm")
+     * @Route("/create-vm/{type}/{email}", name="app_create_vm")
      */
-    public function createVM($type): Response
+    public function createVM($type, $email): Response
     {
         // Create client and authenticate LATER.
         $azureClient = new AzureVMClient(
@@ -100,65 +100,74 @@ class VMController extends AbstractController
             $this->getParameter('wm.password'));
         
         // Create new machine
-        $name = 'new_vm';
+        $vmNumber = 1;
+        $machineName = 'new_vm_' . $vmNumber;
         $region = 'westeurope';
-        $machine = new VirtualMachine($name, $region);
+
+        if($azureClient->getVmDetailsByName($machineName)) {
+            $vmNumber = strval(count($azureClient->getVmDetailsByName($machineName)) + 1);
+            $machineName = 'new_vm_' . $vmNumber;
+        }
+
+        $machine = new VirtualMachine($machineName, $region);
 
         $resourceGroupName = 'azure-sample-group-virtual-machines';
-
         // // Delete afterwards.
         // $azureClient->deleteResourceGroup($resourceGroupName);
         // die();
 
         $azureClient->createResourceGroup($resourceGroupName);
         $machine->setResourceGroup($resourceGroupName);
-
+        
         // Add or change Profiles..
         $storage = new StorageProfile();
         if($type == 'Ubuntu') {
             $storage->addOsDisk([
-                "name" => 'new_vm_osdisk_ubuntu',
+                "name" => 'new_vm_osdisk_ubuntu_' . $vmNumber,
                 "osType" => 'Linux',
                 "createOption" => 'fromImage'
             ]);
             $storage->addImageReference([
-                "sku"=> "16.04-LTS",
-                "publisher"=> "Canonical",
+                "sku" => "16.04-LTS",
+                "publisher" => "Canonical",
                 "version"=> "latest",
-                "offer"=> "UbuntuServer"
+                "offer" => "UbuntuServer"
             ]);
         }
         else if($type == 'Windows') {
             $storage->addOsDisk([
-                "name" => 'new_vm_osdisk_ubuntu',
+                "name" => 'new_vm_osdisk_windows_' . $vmNumber,
                 "createOption" => 'fromImage'
             ]);
             $storage->addImageReference([
                 "sku"=> "2016-Datacenter",
-                "publisher"=> "MicrosoftWindowsServer",
-                "version"=> "latest",
-                "offer"=> "WindowsServer"
+                "publisher" => "MicrosoftWindowsServer",
+                "version" => "latest",
+                "offer" => "WindowsServer"
             ]);
         }
 
         $machine->setStorageProfile($storage);
         
         // Create a public ip address
-        $ipName = 'azure-sample-ip-config';
+        $ipName = 'azure-sample-ip-config-' . $vmNumber;
         $azureClient->createPublicIpAddress($ipName, $resourceGroupName, $region);
 
-
         // Create a virtual network
-        $vnetName = 'azure-sample-vnet';
-        $azureClient->createVirtualNetwork($vnetName, $resourceGroupName);
+        $vnetName = 'azure-sample-vnet-' . $vmNumber;
 
+        if(!$azureClient->getVirtualNetworkDetail('azure-sample-vnet')) {
+            $azureClient->createVirtualNetwork($vnetName, $resourceGroupName);
+        }
 
         // Create a subnet
-        $subnetName = 'azure-sample-subnet';
+        $subnetName = 'azure-sample-subnet-' . $vmNumber;
+    
         $azureClient->createSubnet($vnetName, $subnetName, $resourceGroupName);
 
+
         // Create a network interface
-        $networkName = 'azure-sample-nic';
+        $networkName = 'azure-sample-nic-' . $vmNumber;
         $interface = new NetworkInterface;
         $azureClient->createNetworkInterface(
             $networkName, 
@@ -181,6 +190,16 @@ class VMController extends AbstractController
         // Create a VM.
         $azureClient->createVM($machine);
 
-        return $this->json("OK", Response::HTTP_OK);
+        // Delete afterwards.
+        // $azureClient->deleteResourceGroup($resourceGroupName);
+        // $azureClient->deleteVM($machineName, $resourceGroupName);
+        
+        // return $this->json("OK", Response::HTTP_OK);
+        $this->addFlash(
+            'success',
+            "La machine virtuelle a bien été créé !"
+        );
+
+        return $this->redirectToRoute('app_index', ['email' => $email]);
     }
 }

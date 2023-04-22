@@ -1,0 +1,21 @@
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+    VM
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+
+    <div class="collapse navbar-collapse" id="navbarColor02">
+        <ul class="navbar-nav mr-auto">      
+            <li class="nav-item">
+                <a href="{{ path('account_login') }}" class="dropdown-item">Déconnexion</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+   <script>
+        $('a').mouseover(function() {
+            $(this).dropdown('toggle')
+        })
+    </script>

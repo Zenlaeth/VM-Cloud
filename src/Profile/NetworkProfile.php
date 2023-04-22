@@ -1,8 +1,8 @@
 <?php
 
-namespace Azure\Profile;
+namespace Profile;
 
-use Azure\AzureClient;
+use AzureClient;
 
 
 class NetworkProfile

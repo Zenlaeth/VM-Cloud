@@ -1,8 +1,8 @@
 <?php
 
-namespace Azure;
+namespace Client;
 
-use Azure\Exception\RetryableException;
+use Exception\RetryableException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Message\ResponseInterface;
 
@@ -119,8 +119,16 @@ abstract class AzureClient
         $url = ltrim($url, '/');
         $client = $this->getClient();
         try{
-            $r = $client->delete($url);
-            return $r->getStatusCode();
+            $promise = $client->deleteAsync($url
+            )->then(function ($result) {
+                sleep(600); 
+                return $result->getStatusCode();
+            });
+
+            return $promise;
+
+            // $r = $client->delete($url);
+            // return $r->getStatusCode();
         }
         catch (\Exception $e)
         {
@@ -144,14 +152,22 @@ abstract class AzureClient
         $options['json'] = $params;
 
         try{
-            $r = $client->put($url, $options);
+            // $r = $client->put($url, $options);
+            $promise = $client->putAsync($url, $options
+            )->then(function ($result) {
+                sleep(3); 
+                return $result;
+            })->wait();
 
-            $body = $this->parseResponse($r);
-           
+            $body = $this->parseResponse($promise);
+
             return $body;
         }
         catch (\Exception $e)
         {
+            dump($e->getResponse()->getBody()->getContents());
+            die();
+
             $error = json_decode($e->getResponse()->getBody()->getContents(), true);
             if (stripos($error['error']['message'], 'retryable error') > 0) {
                 throw new RetryableException($error['error']['message']);

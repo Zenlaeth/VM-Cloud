@@ -22,10 +22,13 @@
         <p class="lead">Désolé mais vous n'avez pas assez de crédits !</p>
         {% elseif email == "vm2@hotmail.com" %}
         <p class="lead">
-            <a class="btn btn-primary btn-lg" href="{{ path('app_create_vm', {'type': 'Ubuntu'}) }}" role="button">Créer une machine virtuelle Ubuntu</a>
+            <a class="btn btn-primary btn-lg" href="{{ path('app_create_vm', {'type': 'Ubuntu', 'email': email}) }}" role="button">Créer une machine virtuelle Ubuntu</a>
         </p>
         {% elseif email == "vm3@hotmail.com" %}
-
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="{{ path('app_create_vm', {'type': 'Ubuntu', 'email': email}) }}" role="button">Créer une machine virtuelle Ubuntu</a>
+            <a class="btn btn-primary btn-lg" href="{{ path('app_create_vm', {'type': 'Windows', 'email': email}) }}" role="button">Créer une machine virtuelle Windows</a>
+        </p>
         {% endif %}
     </div>
     

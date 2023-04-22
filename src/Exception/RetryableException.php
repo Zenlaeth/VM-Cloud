@@ -1,6 +1,6 @@
 <?php
 
-namespace Azure\Exception;
+namespace Exception;
 
 class RetryableException extends \Exception
 {

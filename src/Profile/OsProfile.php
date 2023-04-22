@@ -1,6 +1,6 @@
 <?php
 
-namespace Azure\Profile;
+namespace Profile;
 
 
 class OsProfile

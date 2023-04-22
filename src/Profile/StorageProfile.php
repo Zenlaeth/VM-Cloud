@@ -1,6 +1,6 @@
 <?php
 
-namespace Azure\Profile;
+namespace Profile;
 
 
 class StorageProfile
@@ -27,12 +27,12 @@ class StorageProfile
 
     public function addOsDisk($osDisk)
     {
-        $this->osDisk[] = $osDisk;
+        $this->osDisk = $osDisk;
     }
 
     public function addImageReference($imageReference)
     {
-        $this->imageReference[] = $imageReference;
+        $this->imageReference = $imageReference;
     }
 
 }

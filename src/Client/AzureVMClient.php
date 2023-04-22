@@ -1,10 +1,10 @@
 <?php
 
-namespace Azure;
+namespace Client;
 
-use Azure\Entity\VirtualMachine;
-use Azure\Entity\NetworkInterface;
-use Azure\Entity\VirtualMachineInterface;
+use App\Entity\VirtualMachine;
+use App\Entity\NetworkInterface;
+use Entity\VirtualMachineInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;

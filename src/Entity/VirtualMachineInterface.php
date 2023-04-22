@@ -1,12 +1,12 @@
 <?php
 
-namespace Azure\Entity;
+namespace App\Entity;
 
 
-use Azure\Profile\HardwareProfile;
-use Azure\Profile\networkProfile;
-use Azure\Profile\osProfile;
-use Azure\Profile\storageProfile;
+use Profile\HardwareProfile;
+use Profile\networkProfile;
+use Profile\osProfile;
+use Profile\storageProfile;
 
 interface VirtualMachineInterface
 {

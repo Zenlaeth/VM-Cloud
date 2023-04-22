@@ -1,6 +1,6 @@
 <?php
 
-namespace Azure\Entity;
+namespace App\Entity;
 
 
 class NetworkInterface
